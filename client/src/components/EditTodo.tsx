@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/todos-api'
+import { getUploadUrl, uploadFile, patchTodo, getTodos, getTodoDetail } from '../api/todos-api'
+import { Todo } from '../types/Todo'
 
 enum UploadState {
   NoUpload,
@@ -21,6 +22,7 @@ interface EditTodoProps {
 interface EditTodoState {
   file: any
   uploadState: UploadState
+  notes: String
 }
 
 export class EditTodo extends React.PureComponent<
@@ -29,7 +31,8 @@ export class EditTodo extends React.PureComponent<
 > {
   state: EditTodoState = {
     file: undefined,
-    uploadState: UploadState.NoUpload
+    uploadState: UploadState.NoUpload,
+    notes: ''
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +41,13 @@ export class EditTodo extends React.PureComponent<
 
     this.setState({
       file: files[0]
+    })
+  }
+
+  handleNoteChange = (event: { target: { value: String } }) => {
+    const note = event.target.value
+    this.setState({
+      notes: note
     })
   }
 
@@ -52,9 +62,17 @@ export class EditTodo extends React.PureComponent<
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
       const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
-
+      console.log(uploadUrl)
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
+      console.log(this.props.auth.getIdToken())
+      const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      console.log(todos)
+      // await patchTodo(this.props.auth.getIdToken(), this.props.match.params.todoId, {
+      //   name: '',
+      //   dueDate: '',
+      //   done: false
+      // })
 
       alert('File was uploaded!')
     } catch (e) {
@@ -63,6 +81,8 @@ export class EditTodo extends React.PureComponent<
       this.setUploadState(UploadState.NoUpload)
     }
   }
+
+
 
   setUploadState(uploadState: UploadState) {
     this.setState({
@@ -74,7 +94,8 @@ export class EditTodo extends React.PureComponent<
     return (
       <div>
         <h1>Upload new image</h1>
-
+        <h2> {this.props.match.params.todoId} </h2>
+        
         <Form onSubmit={this.handleSubmit}>
           <Form.Field>
             <label>File</label>
@@ -85,9 +106,17 @@ export class EditTodo extends React.PureComponent<
               onChange={this.handleFileChange}
             />
           </Form.Field>
-
+          <Form.Field>
+            <label>note</label>
+            <textarea 
+            placeholder="put some note on your image"
+            onChange={this.handleNoteChange}
+            />
+          </Form.Field>
           {this.renderButton()}
+          {this.renderTmp()}
         </Form>
+        
       </div>
     )
   }
@@ -104,6 +133,14 @@ export class EditTodo extends React.PureComponent<
         >
           Upload
         </Button>
+      </div>
+    )
+  }
+  renderTmp() {
+
+    return (
+      <div>
+        <h1> {this.state.notes} </h1>
       </div>
     )
   }

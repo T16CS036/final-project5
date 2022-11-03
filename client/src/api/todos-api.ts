@@ -71,3 +71,16 @@ export async function getUploadUrl(
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
   await Axios.put(uploadUrl, file)
 }
+
+export async function getTodoDetail(idToken: string, todoId: string): Promise<Todo[]> {
+  console.log('Fetching todo detail')
+
+  const response = await Axios.get(`${apiEndpoint}/todos/${todoId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+  })
+  console.log('Todos:', response.data)
+  return response.data.items
+}
