@@ -59,6 +59,22 @@ export class TodosAccess {
         return items as TodoItem[]
     }
 
+    static async getListTodoDetail(userId: string, todoId: string): Promise<TodoItem[]> {
+        logger.info('getTodosForUser', { userId })
+        const result = await docClient.query({
+            TableName: todosTable,
+            IndexName: indexName,
+            KeyConditionExpression: 'userId = :userId',
+            ExpressionAttributeValues: {
+                ':userId': userId,
+                ':todoId': todoId
+            }
+        }).promise()
+
+        const items = result.Items
+        return items as TodoItem[]
+    }
+    
     static async createTodoItem(todoItem: TodoItem): Promise<TodoItem> {
         logger.info('createTodoItem', { todoItem })
         await docClient.put({
