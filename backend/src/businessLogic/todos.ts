@@ -33,20 +33,21 @@ export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
   return items as TodoItem[]
 }
 
-export async function getTodoDetail(userId: string, todoId: string): Promise<TodoItem[]> {
+export async function getTodoDetail(userId: string, todoId: string): Promise<TodoItem> {
     logger.info('getTodosForUser', { userId })
     logger.info('getTodoDetail', { todoId })
 
     const result = await TodosAccess.getListTodoDetail(userId, todoId)
   
     const items = result
-    return items as TodoItem[]
+    return items as TodoItem
   }
 
 export async function createTodo(
     userId: string,
     todoName: string,
-    dueDate: string
+    dueDate: string,
+    notes: string
     ): Promise<TodoItem> {
     const todoId = uuid.v4()
     
@@ -57,7 +58,8 @@ export async function createTodo(
         name: todoName,
         dueDate,
         done: false,
-        attachmentUrl: null
+        attachmentUrl: null,
+        notes
     }
     
     logger.info('createTodo', { newItem })
