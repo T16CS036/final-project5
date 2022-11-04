@@ -133,6 +133,7 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
+          - dynamodb:PutItem
         Resource: !GetAtt TodosTable.Arn
 
   # TODO: Configure this function

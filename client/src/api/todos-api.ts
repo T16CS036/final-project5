@@ -35,6 +35,7 @@ export async function patchTodo(
   todoId: string,
   updatedTodo: UpdateTodoRequest
 ): Promise<void> {
+  console.log('call API back end')
   await Axios.patch(`${apiEndpoint}/todos/${todoId}`, JSON.stringify(updatedTodo), {
     headers: {
       'Content-Type': 'application/json',
@@ -72,7 +73,7 @@ export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void>
   await Axios.put(uploadUrl, file)
 }
 
-export async function getTodoDetail(idToken: string, todoId: string): Promise<Todo[]> {
+export async function getTodoDetail(idToken: string, todoId: string): Promise<Todo> {
   console.log('Fetching todo detail')
 
   const response = await Axios.get(`${apiEndpoint}/todos/${todoId}`, {

@@ -22,7 +22,7 @@ interface EditTodoProps {
 interface EditTodoState {
   file: any
   uploadState: UploadState
-  notes: String
+  todos: Todo
 }
 
 export class EditTodo extends React.PureComponent<
@@ -32,7 +32,14 @@ export class EditTodo extends React.PureComponent<
   state: EditTodoState = {
     file: undefined,
     uploadState: UploadState.NoUpload,
-    notes: ''
+    todos: {todoId: '',
+      createdAt: '',
+      name: '',
+      dueDate: '',
+      done: false,
+      attachmentUrl: '',
+      notes: ''
+    }  
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,11 +51,9 @@ export class EditTodo extends React.PureComponent<
     })
   }
 
-  handleNoteChange = (event: { target: { value: String } }) => {
+  handleNoteChange = (event: { target: { value: string } }) => {
     const note = event.target.value
-    this.setState({
-      notes: note
-    })
+    this.state.todos.notes = note
   }
 
   handleSubmit = async (event: React.SyntheticEvent) => {
@@ -62,17 +67,20 @@ export class EditTodo extends React.PureComponent<
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
       const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
-      console.log(uploadUrl)
+
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
-      console.log(this.props.auth.getIdToken())
-      const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
-      console.log(todos)
-      // await patchTodo(this.props.auth.getIdToken(), this.props.match.params.todoId, {
-      //   name: '',
-      //   dueDate: '',
-      //   done: false
-      // })
+
+      // const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      // console.log(typeof(todos))
+      // console.log(todos.name)
+
+      // setting note on edit screen
+      await patchTodo(this.props.auth.getIdToken(), this.props.match.params.todoId, {
+        name: this.state.todos.name,
+        dueDate: this.state.todos.dueDate,
+        done: this.state.todos.done,
+      })
 
       alert('File was uploaded!')
     } catch (e) {
@@ -82,18 +90,27 @@ export class EditTodo extends React.PureComponent<
     }
   }
 
-
-
   setUploadState(uploadState: UploadState) {
     this.setState({
       uploadState
     })
   }
 
+  async componentDidMount() {
+    try {
+      const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      this.setState({
+        todos
+      })
+    } catch (e) {
+      alert(`Failed to fetch todos: ${(e as Error).message}`)
+    }
+  }
+
   render() {
     return (
       <div>
-        <h1>Upload new image</h1>
+        <h1> Upload new image </h1>
         <h2> {this.props.match.params.todoId} </h2>
         
         <Form onSubmit={this.handleSubmit}>
@@ -109,6 +126,7 @@ export class EditTodo extends React.PureComponent<
           <Form.Field>
             <label>note</label>
             <textarea 
+            value={this.state.todos.notes}
             placeholder="put some note on your image"
             onChange={this.handleNoteChange}
             />
@@ -116,7 +134,6 @@ export class EditTodo extends React.PureComponent<
           {this.renderButton()}
           {this.renderTmp()}
         </Form>
-        
       </div>
     )
   }
@@ -140,7 +157,7 @@ export class EditTodo extends React.PureComponent<
 
     return (
       <div>
-        <h1> {this.state.notes} </h1>
+        <h1> {this.state.todos.notes} </h1>
       </div>
     )
   }

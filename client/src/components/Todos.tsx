@@ -27,17 +27,23 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean
+  newNotes: string
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
-    loadingTodos: true
+    loadingTodos: true,
+    newNotes: ''
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newTodoName: event.target.value })
+  }
+  handleNoteChange = (event: { target: { value: string } }) => {
+    const notes = event.target.value
+    this.setState({newNotes: notes})
   }
 
   onEditButtonClick = (todoId: string) => {
@@ -49,7 +55,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
-        dueDate
+        dueDate,
+        notes: this.state.newNotes
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
@@ -77,7 +84,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
         name: todo.name,
         dueDate: todo.dueDate,
-        done: !todo.done
+        done: !todo.done,
       })
       this.setState({
         todos: update(this.state.todos, {
@@ -127,14 +134,22 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             }}
             fluid
             actionPosition="left"
-            placeholder="To change the world..."
+            placeholder="please input todoId"
             onChange={this.handleNameChange}
+          />
+        </Grid.Column>
+        <Grid.Column width={16}>
+          <textarea 
+          style={{width: '100%', height:100}} 
+          placeholder="this is textarea for note"
+          onChange={this.handleNoteChange}
           />
         </Grid.Column>
         <Grid.Column width={16}>
           <Divider />
         </Grid.Column>
       </Grid.Row>
+      
     )
   }
 
