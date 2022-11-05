@@ -89,6 +89,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         name: todo.name,
         dueDate: todo.dueDate,
         done: !todo.done,
+        notes: ''
       })
       this.setState({
         todos: update(this.state.todos, {

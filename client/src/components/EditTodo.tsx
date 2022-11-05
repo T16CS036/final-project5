@@ -3,6 +3,7 @@ import { Form, Button, Grid, Loader } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getUploadUrl, uploadFile, patchTodo, getTodos, getTodoDetail } from '../api/todos-api'
 import { Todo } from '../types/Todo'
+import { useState } from 'react'
 
 enum UploadState {
   NoUpload,
@@ -24,6 +25,7 @@ interface EditTodoState {
   uploadState: UploadState
   todos: Todo
   loading: Boolean
+  notes: string
 }
 
 export class EditTodo extends React.PureComponent<
@@ -41,7 +43,8 @@ export class EditTodo extends React.PureComponent<
       attachmentUrl: '',
       notes: ''
     },
-    loading: false
+    loading: false,
+    notes: ''
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,8 +57,9 @@ export class EditTodo extends React.PureComponent<
   }
 
   handleNoteChange = (event: { target: { value: string } }) => {
-    const note = event.target.value
-    this.state.todos.notes = note
+    this.setState({
+      notes: event.target.value
+    })
   }
 
   handleSubmit = async (event: React.SyntheticEvent) => {
@@ -73,15 +77,12 @@ export class EditTodo extends React.PureComponent<
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
 
-      // const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
-      // console.log(typeof(todos))
-      // console.log(todos.name)
-
       // setting note on edit screen
       await patchTodo(this.props.auth.getIdToken(), this.props.match.params.todoId, {
         name: this.state.todos.name,
         dueDate: this.state.todos.dueDate,
         done: this.state.todos.done,
+        notes: this.state.notes
       })
 
       alert('File was uploaded!')
@@ -103,7 +104,8 @@ export class EditTodo extends React.PureComponent<
       const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
       this.setState({
         todos,
-        loading: true
+        loading: true,
+        notes: todos.notes
       })
     } catch (e) {
       alert(`Failed to fetch todos: ${(e as Error).message}`)
@@ -133,9 +135,9 @@ export class EditTodo extends React.PureComponent<
           <Form.Field>
             <label>note</label>
             <textarea 
-            value={this.state.todos.notes}
-            placeholder="put some note on your image"
-            onChange={this.handleNoteChange}
+              value={this.state.notes}
+              placeholder="put some note on your image"
+              onChange={this.handleNoteChange}
             />
           </Form.Field>
           {this.renderButton()}
