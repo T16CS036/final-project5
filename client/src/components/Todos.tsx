@@ -51,6 +51,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+    if(this.state.newTodoName.length >= 2){
     try {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
@@ -64,6 +65,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
     } catch {
       alert('Todo creation failed')
+    }
+    }else{
+      alert('Atleast input 2 character in name place')
     }
   }
 
@@ -207,9 +211,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   <Icon name="delete" />
                 </Button>
               </Grid.Column>
-              {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
-              )}
+              <Grid.Column width={8}>
+                {todo.attachmentUrl && (
+                  <Image src={todo.attachmentUrl} size="small" wrapped />
+                )}
+              </Grid.Column>
+              <Grid.Column width={8}>
+                Notes: {todo.notes}
+              </Grid.Column>
               <Grid.Column width={16}>
                 <Divider />
               </Grid.Column>

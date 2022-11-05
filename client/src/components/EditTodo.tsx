@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
+import { Form, Button, Grid, Loader } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getUploadUrl, uploadFile, patchTodo, getTodos, getTodoDetail } from '../api/todos-api'
 import { Todo } from '../types/Todo'
@@ -23,6 +23,7 @@ interface EditTodoState {
   file: any
   uploadState: UploadState
   todos: Todo
+  loading: Boolean
 }
 
 export class EditTodo extends React.PureComponent<
@@ -39,7 +40,8 @@ export class EditTodo extends React.PureComponent<
       done: false,
       attachmentUrl: '',
       notes: ''
-    }  
+    },
+    loading: false
   }
 
   handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +102,8 @@ export class EditTodo extends React.PureComponent<
     try {
       const todos = await getTodoDetail(this.props.auth.getIdToken(), this.props.match.params.todoId)
       this.setState({
-        todos
+        todos,
+        loading: true
       })
     } catch (e) {
       alert(`Failed to fetch todos: ${(e as Error).message}`)
@@ -108,10 +111,14 @@ export class EditTodo extends React.PureComponent<
   }
 
   render() {
+    if(!this.state.loading){
+      return this.renderLoading()
+    }
     return (
       <div>
         <h1> Upload new image </h1>
-        <h2> {this.props.match.params.todoId} </h2>
+        <h2> TodoID: {this.props.match.params.todoId} </h2>
+        <h2> TodoName: {this.state.todos.name}</h2>
         
         <Form onSubmit={this.handleSubmit}>
           <Form.Field>
@@ -132,7 +139,6 @@ export class EditTodo extends React.PureComponent<
             />
           </Form.Field>
           {this.renderButton()}
-          {this.renderTmp()}
         </Form>
       </div>
     )
@@ -153,12 +159,14 @@ export class EditTodo extends React.PureComponent<
       </div>
     )
   }
-  renderTmp() {
 
+  renderLoading() {
     return (
-      <div>
-        <h1> {this.state.todos.notes} </h1>
-      </div>
+      <Grid.Row>
+        <Loader indeterminate active inline="centered">
+          Loading TODOs
+        </Loader>
+      </Grid.Row>
     )
   }
 }
